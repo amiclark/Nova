@@ -1,0 +1,38 @@
+name: Nova build
+on:
+  push:
+    branches: [nova]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison flex clang lld llvm libssl-dev \
+            libelf-dev build-essential zip cpio binutils git zstd lz4 \
+            device-tree-compiler gcc-aarch64-linux-gnu
+
+      - name: build
+        run: |
+          make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
+            CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
+            -Wno-error=unused-function spes-perf_defconfig
+          make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
+            CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
+            -Wno-error=unused-function KBUILD_BUILD_USER=Nova:3 \
+            KBUILD_BUILD_HOST=kernelinator -j$(nproc)
+
+      - name: pack
+        run: |
+          git clone --depth=1 -b spes https://github.com/Madara273/AnyKernel3.git AnyKernel3
+          cp out/arch/arm64/boot/Image.gz out/arch/arm64/boot/dtbo.img AnyKernel3/
+          cd AnyKernel3 && zip -r9 ../nova-$(date +%Y%m%d-%H%M).zip * -x README.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nova-kernel
+          path: nova-*.zip
