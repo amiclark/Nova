@@ -1,4 +1,5 @@
 name: Nova build
+
 on:
   push:
     branches: [nova]
@@ -16,11 +17,22 @@ jobs:
             libelf-dev build-essential zip cpio binutils git zstd lz4 \
             device-tree-compiler gcc-aarch64-linux-gnu
 
-      - name: build
+      - name: defconfig
         run: |
           make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
             CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
-            -Wno-error=unused-function spes-perf_defconfig
+            -Wno-error=unused-function spes-perf_defconfig nova.config
+
+      - name: verify nova config
+        run: |
+          grep -q "CONFIG_KEXEC=y" out/.config
+          grep -q "CONFIG_NETFILTER_XT_TARGET_TTL=y" out/.config
+          grep -q "CONFIG_CFS_BANDWIDTH=y" out/.config
+          grep -q "CONFIG_PSTORE=y" out/.config
+          echo "nova.config merged — wishlist armed"
+
+      - name: build
+        run: |
           make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
             CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
             -Wno-error=unused-function KBUILD_BUILD_USER=Nova:3 \
