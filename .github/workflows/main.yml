@@ -20,7 +20,7 @@ jobs:
         run: |
           make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
             CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
-            -Wno-error=unused-function spes-perf_defconfig nova.config
+            -Wno-error=unused-function spes-perf_defconfig
 
       - name: verify nova config
         run: |
