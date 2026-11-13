@@ -22,17 +22,17 @@ jobs:
             CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
             -Wno-error=unused-function spes-perf_defconfig
 
-- name: verify nova config
-  run: |
-    for sym in KEXEC NETFILTER_XT_TARGET_TTL IP6_NF_TARGET_HL CFS_BANDWIDTH PSTORE; do
-      if grep -q "CONFIG_${sym}=y" out/.config; then
-        echo "✓ CONFIG_${sym}=y"
-      elif grep -q "# CONFIG_${sym} is not set" out/.config; then
-        echo "✗ CONFIG_${sym} — visible but forced off"
-      else
-        echo "✗ CONFIG_${sym} — ABSENT from this tree's Kconfig"
-      fi
-    done
+      - name: verify nova config
+        run: |
+          for sym in KEXEC NETFILTER_XT_TARGET_TTL IP6_NF_TARGET_HL CFS_BANDWIDTH PSTORE; do
+            if grep -q "CONFIG_${sym}=y" out/.config; then
+              echo "✓ CONFIG_${sym}=y"
+            elif grep -q "# CONFIG_${sym} is not set" out/.config; then
+              echo "✗ CONFIG_${sym} — visible but forced off"
+            else
+              echo "✗ CONFIG_${sym} — ABSENT from this tree's Kconfig"
+            fi
+          done
 
       - name: build
         run: |
