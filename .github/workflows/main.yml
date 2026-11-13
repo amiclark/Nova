@@ -1,8 +1,7 @@
 name: Nova build
 
 on:
-  push:
-    branches: [nova]
+  workflow_dispatch:
 
 jobs:
   build:
